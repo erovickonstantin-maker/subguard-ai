@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Users, ShieldCheck, AlertTriangle, ShieldAlert, LogOut } from "lucide-react";
+import { Users, ShieldCheck, AlertTriangle, ShieldAlert } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,11 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { UploadModal } from "@/components/UploadModal";
 import { AddSubcontractorModal } from "@/components/AddSubcontractorModal";
-import { useDemoStore, PLAN_LABEL } from "@/lib/demo-store";
+import { StatusBadge } from "@/components/StatusBadge";
 import type { DashboardKpis, SubcontractorWithDocuments } from "@/types";
 
 interface DashboardClientProps {
@@ -28,53 +27,16 @@ interface DashboardClientProps {
   kpis: DashboardKpis;
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  active: "Aktiv",
-  expiring_soon: "Läuft bald ab",
-  expired: "Abgelaufen",
-  invalid: "Ungültig",
-};
-
-const STATUS_STYLE: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
-  expiring_soon: "bg-amber-100 text-amber-700 hover:bg-amber-100",
-  expired: "bg-red-100 text-red-700 hover:bg-red-100",
-  invalid: "bg-red-100 text-red-700 hover:bg-red-100",
-};
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <Badge className={STATUS_STYLE[status] ?? ""}>
-      {STATUS_LABEL[status] ?? status}
-    </Badge>
-  );
-}
-
 export function DashboardClient({ subcontractors, kpis }: DashboardClientProps) {
   const router = useRouter();
-  const { user, logout } = useDemoStore();
-
-  function handleLogout() {
-    // Just clear the session — the dashboard page's own auth guard
-    // effect redirects to /login once `user` becomes null. Also
-    // pushing a route here races that effect and the two navigations
-    // can conflict.
-    logout();
-  }
 
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            {user && (
-              <Badge variant="secondary">{PLAN_LABEL[user.plan]}-Plan</Badge>
-            )}
-          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Übersicht</h1>
           <p className="text-sm text-muted-foreground">
-            {user?.companyName ?? "Ihr Unternehmen"} — Übersicht über alle
-            Subunternehmer und deren Compliance-Status.
+            Alle Subunternehmer und deren Compliance-Status auf einen Blick.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -83,10 +45,6 @@ export function DashboardClient({ subcontractors, kpis }: DashboardClientProps) 
             subcontractors={subcontractors}
             onUploaded={() => router.refresh()}
           />
-          <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="h-4 w-4" />
-            Abmelden
-          </Button>
         </div>
       </div>
 
@@ -175,8 +133,20 @@ export function DashboardClient({ subcontractors, kpis }: DashboardClientProps) 
                   )[0];
 
                 return (
-                  <TableRow key={sub.id}>
-                    <TableCell className="font-medium">{sub.name}</TableCell>
+                  <TableRow
+                    key={sub.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/dashboard/subcontractors/${sub.id}`)}
+                  >
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/dashboard/subcontractors/${sub.id}`}
+                        className="hover:underline"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        {sub.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {sub.email ?? sub.phone ?? "—"}
                     </TableCell>

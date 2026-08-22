@@ -23,16 +23,51 @@ export interface DemoUser {
   plan: PlanKey;
 }
 
+export type TeamRole = "admin" | "member";
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: TeamRole;
+  invitedAt: string;
+}
+
+export interface Invoice {
+  id: string;
+  date: string;
+  amount: number;
+  plan: PlanKey;
+  status: "paid" | "open";
+}
+
+export interface CompanySettings {
+  companyName: string;
+  contactEmail: string;
+  notifyByEmail: boolean;
+  notifyDaysBefore: number;
+}
+
 interface DemoState {
   user: DemoUser | null;
   subcontractors: SubcontractorWithDocuments[];
+  teamMembers: TeamMember[];
+  invoices: Invoice[];
+  settings: CompanySettings;
 }
 
-const STORAGE_KEY = "subguard_demo_state_v1";
+const STORAGE_KEY = "subguard_demo_state_v2";
 
-const SEED_STATE: DemoState = {
-  user: null,
-  subcontractors: [],
+export const PLAN_PRICE: Record<PlanKey, number> = {
+  starter: 49,
+  pro: 149,
+  enterprise: 349,
+};
+
+export const PLAN_LIMITS: Record<PlanKey, number> = {
+  starter: 15,
+  pro: Infinity,
+  enterprise: Infinity,
 };
 
 function seedSubcontractors(): SubcontractorWithDocuments[] {
@@ -92,18 +127,82 @@ function seedSubcontractors(): SubcontractorWithDocuments[] {
   ];
 }
 
+function seedTeamMembers(): TeamMember[] {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  return [
+    {
+      id: "team-1",
+      name: "Anna Bauer",
+      email: "anna.bauer@subguard.ai",
+      role: "admin",
+      invitedAt: new Date(now - 60 * day).toISOString(),
+    },
+    {
+      id: "team-2",
+      name: "Jonas Weber",
+      email: "jonas.weber@subguard.ai",
+      role: "member",
+      invitedAt: new Date(now - 20 * day).toISOString(),
+    },
+  ];
+}
+
+function seedInvoices(): Invoice[] {
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  return [0, 1, 2].map((i) => ({
+    id: `inv-${i}`,
+    date: new Date(now - (i + 1) * 30 * day).toISOString().slice(0, 10),
+    amount: PLAN_PRICE.starter,
+    plan: "starter" as PlanKey,
+    status: "paid" as const,
+  }));
+}
+
+function defaultSettings(): CompanySettings {
+  return {
+    companyName: "Mustermann Bau GmbH",
+    contactEmail: "demo@subguard.ai",
+    notifyByEmail: true,
+    notifyDaysBefore: 14,
+  };
+}
+
+function seedState(): DemoState {
+  return {
+    user: null,
+    subcontractors: seedSubcontractors(),
+    teamMembers: seedTeamMembers(),
+    invoices: seedInvoices(),
+    settings: defaultSettings(),
+  };
+}
+
 interface DemoStoreValue {
   user: DemoUser | null;
   subcontractors: SubcontractorWithDocuments[];
+  teamMembers: TeamMember[];
+  invoices: Invoice[];
+  settings: CompanySettings;
   isHydrated: boolean;
   login: (email: string, companyName: string) => void;
   logout: () => void;
   selectPlan: (plan: PlanKey) => void;
   addSubcontractor: (input: { name: string; email: string; phone: string }) => string;
+  updateSubcontractor: (
+    id: string,
+    input: { name: string; email: string; phone: string }
+  ) => void;
+  deleteSubcontractor: (id: string) => void;
+  deleteDocument: (subcontractorId: string, documentId: string) => void;
   extractDocument: (
     subcontractorId: string,
     file: File
   ) => Promise<ExtractedDocumentData>;
+  addTeamMember: (input: { name: string; email: string; role: TeamRole }) => void;
+  removeTeamMember: (id: string) => void;
+  updateSettings: (input: Partial<CompanySettings>) => void;
 }
 
 const DemoStoreContext = createContext<DemoStoreValue | null>(null);
@@ -158,14 +257,14 @@ function aggregateSubcontractorStatus(documents: DocumentRecord[]) {
 
 export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<DemoState>(() => {
-    if (typeof window === "undefined") return SEED_STATE;
+    if (typeof window === "undefined") return seedState();
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) return JSON.parse(raw) as DemoState;
     } catch {
       // fall through to seeded state
     }
-    return { user: null, subcontractors: seedSubcontractors() };
+    return seedState();
   });
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -186,6 +285,7 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({
       ...prev,
       user: { email, companyName, plan: prev.user?.plan ?? "starter" },
+      settings: { ...prev.settings, companyName, contactEmail: email },
     }));
   }, []);
 
@@ -219,6 +319,52 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
         ],
       }));
       return id;
+    },
+    []
+  );
+
+  const updateSubcontractor = useCallback(
+    (id: string, input: { name: string; email: string; phone: string }) => {
+      setState((prev) => ({
+        ...prev,
+        subcontractors: prev.subcontractors.map((s) =>
+          s.id === id
+            ? {
+                ...s,
+                name: input.name,
+                email: input.email || null,
+                phone: input.phone || null,
+              }
+            : s
+        ),
+      }));
+    },
+    []
+  );
+
+  const deleteSubcontractor = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      subcontractors: prev.subcontractors.filter((s) => s.id !== id),
+    }));
+  }, []);
+
+  const deleteDocument = useCallback(
+    (subcontractorId: string, documentId: string) => {
+      setState((prev) => ({
+        ...prev,
+        subcontractors: prev.subcontractors.map((s) => {
+          if (s.id !== subcontractorId) return s;
+          const documents = s.documents.filter((doc) => doc.id !== documentId);
+          return {
+            ...s,
+            documents,
+            status: documents.length
+              ? aggregateSubcontractorStatus(documents)
+              : "active",
+          };
+        }),
+      }));
     },
     []
   );
@@ -281,18 +427,80 @@ export function DemoStoreProvider({ children }: { children: React.ReactNode }) {
     [state.subcontractors]
   );
 
+  const addTeamMember = useCallback(
+    (input: { name: string; email: string; role: TeamRole }) => {
+      setState((prev) => ({
+        ...prev,
+        teamMembers: [
+          {
+            id: `team-${Date.now()}`,
+            name: input.name,
+            email: input.email,
+            role: input.role,
+            invitedAt: new Date().toISOString(),
+          },
+          ...prev.teamMembers,
+        ],
+      }));
+    },
+    []
+  );
+
+  const removeTeamMember = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      teamMembers: prev.teamMembers.filter((m) => m.id !== id),
+    }));
+  }, []);
+
+  const updateSettings = useCallback((input: Partial<CompanySettings>) => {
+    setState((prev) => ({
+      ...prev,
+      settings: { ...prev.settings, ...input },
+      user: prev.user
+        ? {
+            ...prev.user,
+            companyName: input.companyName ?? prev.user.companyName,
+          }
+        : prev.user,
+    }));
+  }, []);
+
   const value = useMemo<DemoStoreValue>(
     () => ({
       user: state.user,
       subcontractors: state.subcontractors,
+      teamMembers: state.teamMembers,
+      invoices: state.invoices,
+      settings: state.settings,
       isHydrated,
       login,
       logout,
       selectPlan,
       addSubcontractor,
+      updateSubcontractor,
+      deleteSubcontractor,
+      deleteDocument,
       extractDocument,
+      addTeamMember,
+      removeTeamMember,
+      updateSettings,
     }),
-    [state, isHydrated, login, logout, selectPlan, addSubcontractor, extractDocument]
+    [
+      state,
+      isHydrated,
+      login,
+      logout,
+      selectPlan,
+      addSubcontractor,
+      updateSubcontractor,
+      deleteSubcontractor,
+      deleteDocument,
+      extractDocument,
+      addTeamMember,
+      removeTeamMember,
+      updateSettings,
+    ]
   );
 
   return (

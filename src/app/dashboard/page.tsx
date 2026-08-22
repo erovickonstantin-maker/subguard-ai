@@ -1,21 +1,12 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { useMemo } from "react";
 import { DashboardClient } from "@/components/DashboardClient";
 import { useDemoStore } from "@/lib/demo-store";
 import type { DashboardKpis, DocumentRecord } from "@/types";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { user, subcontractors, isHydrated } = useDemoStore();
-
-  useEffect(() => {
-    if (isHydrated && !user) {
-      router.replace("/login");
-    }
-  }, [isHydrated, user, router]);
+  const { subcontractors } = useDemoStore();
 
   const kpis = useMemo<DashboardKpis>(() => {
     const allDocuments: DocumentRecord[] = subcontractors.flatMap(
@@ -33,23 +24,8 @@ export default function DashboardPage() {
     };
   }, [subcontractors]);
 
-  if (!isHydrated || !user) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-24 text-center text-muted-foreground">
-        {isHydrated ? (
-          <>
-            <ShieldCheck className="h-8 w-8" />
-            <p className="text-sm">Weiterleitung zur Anmeldung…</p>
-          </>
-        ) : (
-          <Loader2 className="h-6 w-6 animate-spin" />
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
+    <div className="mx-auto w-full max-w-6xl">
       <DashboardClient subcontractors={subcontractors} kpis={kpis} />
     </div>
   );
