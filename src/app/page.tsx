@@ -44,6 +44,55 @@ const FEATURES = [
   },
 ];
 
+const PRICING_PLANS = [
+  {
+    key: "starter",
+    name: "Starter",
+    description: "Für kleine Betriebe mit bis zu 15 Subunternehmern.",
+    price: "$49",
+    features: [
+      "Bis zu 15 Subunternehmer",
+      "KI-Dokumentenanalyse",
+      "E-Mail-Warnungen",
+      "1 Nutzerkonto",
+    ],
+    highlighted: false,
+    badge: null as string | null,
+  },
+  {
+    key: "pro",
+    name: "Pro",
+    description:
+      "Für wachsende Bauunternehmen mit unbegrenzten Subunternehmern.",
+    price: "$149",
+    features: [
+      "Unbegrenzte Subunternehmer",
+      "KI-Dokumentenanalyse",
+      "E-Mail- & SMS-Warnungen",
+      "Bis zu 5 Nutzerkonten",
+      "Priorisierter Support",
+    ],
+    highlighted: true,
+    badge: "Beliebt",
+  },
+  {
+    key: "enterprise",
+    name: "Enterprise",
+    description:
+      "Für große Bauunternehmen mit mehreren Standorten und Teams.",
+    price: "$349",
+    features: [
+      "Unbegrenzte Subunternehmer & Nutzer",
+      "KI-Dokumentenanalyse",
+      "E-Mail- & SMS-Warnungen",
+      "API-Zugriff",
+      "Dedizierter Ansprechpartner",
+    ],
+    highlighted: false,
+    badge: null as string | null,
+  },
+] as const;
+
 const FAQ = [
   {
     question: "Welche Dokumente kann SubGuard AI analysieren?",
@@ -87,7 +136,7 @@ export default function LandingPage() {
               FAQ
             </a>
           </nav>
-          <Button render={<Link href="/dashboard" />}>
+          <Button nativeButton={false} render={<Link href="/dashboard" />}>
             Dashboard öffnen
             <ArrowRight className="h-4 w-4" />
           </Button>
@@ -106,11 +155,11 @@ export default function LandingPage() {
           überwacht Ablaufdaten und warnt Sie rechtzeitig — bevor es teuer wird.
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
-          <Button size="lg" render={<Link href="/dashboard" />}>
+          <Button size="lg" nativeButton={false} render={<Link href="/dashboard" />}>
             Jetzt kostenlos starten
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <Button size="lg" variant="outline" render={<a href="#features" />}>
+          <Button size="lg" variant="outline" nativeButton={false} render={<a href="#features" />}>
             Mehr erfahren
           </Button>
         </div>
@@ -123,8 +172,8 @@ export default function LandingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-lg border">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-[560px] text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
                     <th className="px-4 py-2 text-left font-medium">
@@ -197,85 +246,51 @@ export default function LandingPage() {
       </section>
 
       <section id="pricing" className="py-20">
-        <div className="mx-auto max-w-4xl px-6">
+        <div className="mx-auto max-w-5xl px-6">
           <h2 className="text-center text-3xl font-bold tracking-tight">
             Einfache, transparente Preise
           </h2>
           <p className="mt-3 text-center text-muted-foreground">
             Monatlich kündbar. Keine versteckten Kosten.
           </p>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Starter</CardTitle>
-                <CardDescription>
-                  Für kleine Betriebe mit bis zu 15 Subunternehmern.
-                </CardDescription>
-                <div className="mt-4 text-4xl font-bold">
-                  $49
-                  <span className="text-base font-normal text-muted-foreground">
-                    {" "}
-                    / Monat
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  "Bis zu 15 Subunternehmer",
-                  "KI-Dokumentenanalyse",
-                  "E-Mail-Warnungen",
-                  "1 Nutzerkonto",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    {item}
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {PRICING_PLANS.map((plan) => (
+              <Card
+                key={plan.key}
+                className={plan.highlighted ? "border-primary" : undefined}
+              >
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>{plan.name}</CardTitle>
+                    {plan.badge && <Badge>{plan.badge}</Badge>}
                   </div>
-                ))}
-                <Button
-                  className="mt-4 w-full"
-                  variant="outline"
-                  render={<Link href="/dashboard" />}
-                >
-                  Starter wählen
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Pro</CardTitle>
-                  <Badge>Beliebt</Badge>
-                </div>
-                <CardDescription>
-                  Für wachsende Bauunternehmen mit unbegrenzten Subunternehmern.
-                </CardDescription>
-                <div className="mt-4 text-4xl font-bold">
-                  $149
-                  <span className="text-base font-normal text-muted-foreground">
-                    {" "}
-                    / Monat
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[
-                  "Unbegrenzte Subunternehmer",
-                  "KI-Dokumentenanalyse",
-                  "E-Mail- & SMS-Warnungen",
-                  "Bis zu 5 Nutzerkonten",
-                  "Priorisierter Support",
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    {item}
+                  <CardDescription>{plan.description}</CardDescription>
+                  <div className="mt-4 text-4xl font-bold">
+                    {plan.price}
+                    <span className="text-base font-normal text-muted-foreground">
+                      {" "}
+                      / Monat
+                    </span>
                   </div>
-                ))}
-                <Button className="mt-4 w-full" render={<Link href="/dashboard" />}>
-                  Pro wählen
-                </Button>
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {plan.features.map((item) => (
+                    <div key={item} className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      {item}
+                    </div>
+                  ))}
+                  <Button
+                    className="mt-4 w-full"
+                    variant={plan.highlighted ? "default" : "outline"}
+                    nativeButton={false}
+                    render={<Link href={`/login?plan=${plan.key}`} />}
+                  >
+                    {plan.name} wählen
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

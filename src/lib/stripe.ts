@@ -16,6 +16,11 @@ export const STRIPE_PLANS = {
     priceId: process.env.STRIPE_PRICE_ID_PRO ?? "",
     price: 149,
   },
+  enterprise: {
+    name: "Enterprise",
+    priceId: process.env.STRIPE_PRICE_ID_ENTERPRISE ?? "",
+    price: 349,
+  },
 } as const;
 
 export type StripePlanKey = keyof typeof STRIPE_PLANS;

@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDemoStore } from "@/lib/demo-store";
 import type { ExtractedDocumentData, Subcontractor } from "@/types";
 
 interface UploadModalProps {
@@ -30,6 +31,7 @@ interface UploadModalProps {
 type UploadState = "idle" | "uploading" | "success" | "error";
 
 export function UploadModal({ subcontractors, onUploaded }: UploadModalProps) {
+  const { extractDocument } = useDemoStore();
   const [open, setOpen] = useState(false);
   const [subcontractorId, setSubcontractorId] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
@@ -54,22 +56,8 @@ export function UploadModal({ subcontractors, onUploaded }: UploadModalProps) {
     setErrorMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("subcontractor_id", subcontractorId);
-
-      const response = await fetch("/api/extract-document", {
-        method: "POST",
-        body: formData,
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Analyse fehlgeschlagen.");
-      }
-
-      setExtracted(payload.extracted as ExtractedDocumentData);
+      const result = await extractDocument(subcontractorId, file);
+      setExtracted(result);
       setState("success");
       onUploaded();
     } catch (error) {
@@ -129,7 +117,12 @@ export function UploadModal({ subcontractors, onUploaded }: UploadModalProps) {
                 onValueChange={(value) => setSubcontractorId(value ?? "")}
               >
                 <SelectTrigger id="subcontractor" className="w-full">
-                  <SelectValue placeholder="Subunternehmer auswählen" />
+                  <SelectValue placeholder="Subunternehmer auswählen">
+                    {(value: string | null) =>
+                      subcontractors.find((sub) => sub.id === value)?.name ??
+                      "Subunternehmer auswählen"
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {subcontractors.map((sub) => (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Users, ShieldCheck, AlertTriangle, ShieldAlert } from "lucide-react";
+import { Users, ShieldCheck, AlertTriangle, ShieldAlert, LogOut } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -17,7 +17,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { UploadModal } from "@/components/UploadModal";
+import { AddSubcontractorModal } from "@/components/AddSubcontractorModal";
+import { useDemoStore, PLAN_LABEL } from "@/lib/demo-store";
 import type { DashboardKpis, SubcontractorWithDocuments } from "@/types";
 
 interface DashboardClientProps {
@@ -49,20 +52,42 @@ function StatusBadge({ status }: { status: string }) {
 
 export function DashboardClient({ subcontractors, kpis }: DashboardClientProps) {
   const router = useRouter();
+  const { user, logout } = useDemoStore();
+
+  function handleLogout() {
+    // Just clear the session — the dashboard page's own auth guard
+    // effect redirects to /login once `user` becomes null. Also
+    // pushing a route here races that effect and the two navigations
+    // can conflict.
+    logout();
+  }
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+            {user && (
+              <Badge variant="secondary">{PLAN_LABEL[user.plan]}-Plan</Badge>
+            )}
+          </div>
           <p className="text-sm text-muted-foreground">
-            Übersicht über alle Subunternehmer und deren Compliance-Status.
+            {user?.companyName ?? "Ihr Unternehmen"} — Übersicht über alle
+            Subunternehmer und deren Compliance-Status.
           </p>
         </div>
-        <UploadModal
-          subcontractors={subcontractors}
-          onUploaded={() => router.refresh()}
-        />
+        <div className="flex flex-wrap items-center gap-2">
+          <AddSubcontractorModal />
+          <UploadModal
+            subcontractors={subcontractors}
+            onUploaded={() => router.refresh()}
+          />
+          <Button variant="ghost" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
+            Abmelden
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

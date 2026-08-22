@@ -1,65 +1,52 @@
-import { ShieldCheck } from "lucide-react";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { ShieldCheck, Loader2 } from "lucide-react";
 import { DashboardClient } from "@/components/DashboardClient";
-import type {
-  DashboardKpis,
-  DocumentRecord,
-  SubcontractorWithDocuments,
-} from "@/types";
+import { useDemoStore } from "@/lib/demo-store";
+import type { DashboardKpis, DocumentRecord } from "@/types";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function DashboardPage() {
+  const router = useRouter();
+  const { user, subcontractors, isHydrated } = useDemoStore();
 
-  if (!user) {
+  useEffect(() => {
+    if (isHydrated && !user) {
+      router.replace("/login");
+    }
+  }, [isHydrated, user, router]);
+
+  const kpis = useMemo<DashboardKpis>(() => {
+    const allDocuments: DocumentRecord[] = subcontractors.flatMap(
+      (sub) => sub.documents ?? []
+    );
+    return {
+      totalSubcontractors: subcontractors.length,
+      activeDocuments: allDocuments.filter((doc) => doc.status === "active")
+        .length,
+      expiringSoonDocuments: allDocuments.filter(
+        (doc) => doc.status === "expiring_soon"
+      ).length,
+      expiredDocuments: allDocuments.filter((doc) => doc.status === "expired")
+        .length,
+    };
+  }, [subcontractors]);
+
+  if (!isHydrated || !user) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-        <ShieldCheck className="h-10 w-10 text-primary" />
-        <h1 className="text-xl font-semibold">Bitte melden Sie sich an</h1>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Sie müssen angemeldet sein, um Ihr SubGuard-AI-Dashboard zu sehen.
-        </p>
-        <Link href="/" className="text-sm text-primary underline">
-          Zurück zur Startseite
-        </Link>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-24 text-center text-muted-foreground">
+        {isHydrated ? (
+          <>
+            <ShieldCheck className="h-8 w-8" />
+            <p className="text-sm">Weiterleitung zur Anmeldung…</p>
+          </>
+        ) : (
+          <Loader2 className="h-6 w-6 animate-spin" />
+        )}
       </div>
     );
   }
-
-  const { data: company } = await supabase
-    .from("companies")
-    .select("id")
-    .eq("owner_id", user.id)
-    .single();
-
-  const { data: subcontractorRows } = company
-    ? await supabase
-        .from("subcontractors")
-        .select("*, documents(*)")
-        .eq("company_id", company.id)
-        .order("created_at", { ascending: false })
-    : { data: [] as SubcontractorWithDocuments[] | null };
-
-  const subcontractors = (subcontractorRows ??
-    []) as SubcontractorWithDocuments[];
-
-  const allDocuments: DocumentRecord[] = subcontractors.flatMap(
-    (sub) => sub.documents ?? []
-  );
-
-  const kpis: DashboardKpis = {
-    totalSubcontractors: subcontractors.length,
-    activeDocuments: allDocuments.filter((doc) => doc.status === "active")
-      .length,
-    expiringSoonDocuments: allDocuments.filter(
-      (doc) => doc.status === "expiring_soon"
-    ).length,
-    expiredDocuments: allDocuments.filter((doc) => doc.status === "expired")
-      .length,
-  };
 
   return (
     <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
