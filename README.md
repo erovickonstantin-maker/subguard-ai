@@ -1,5 +1,26 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Berghaus – offene Arbeiten (To-do-App)
+
+Eine eigenständige, mobilfreundliche To-do-Liste für die Arbeiten am „Serbien Berghaus“, erreichbar unter `/berghaus` (z. B. `http://localhost:3000/berghaus`).
+
+**Funktionen:**
+- Aufgaben gruppiert nach Kategorie (Außenbereich, Haus, Technik & Infrastruktur, Sonstiges)
+- Checkbox „erledigt“, Statusauswahl (Offen / In Planung / In Arbeit / Erledigt), optionales Notizfeld, Löschen
+- Neue Aufgaben mit Titel und Kategorie hinzufügen
+- Fortschrittsanzeige mit Fortschrittsbalken ("x von y erledigt")
+- Große, gut anklickbare Bedienelemente – getestet auf Desktop- und iPhone-Breite (390px)
+
+**Datenspeicherung:**
+- Alle Änderungen werden sofort im `localStorage` des Browsers gespeichert (Schlüssel `berghaus-todos`). Nach Schließen und erneutem Öffnen der Seite im selben Browser bleiben alle Aufgaben erhalten.
+- Dieses Projekt enthält zwar eine Supabase-Anbindung, aber ohne ausgefüllte `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env` ist kein Backend aktiv konfiguriert. Die Berghaus-App nutzt deshalb ausschließlich `localStorage` und **synchronisiert die Daten nicht automatisch zwischen mehreren Geräten** (z. B. Computer und iPhone) – jedes Gerät hat seinen eigenen Browser-Speicher.
+- Für den Datenaustausch zwischen Geräten gibt es unten auf der Seite die Buttons „Als JSON exportieren“ und „JSON importieren“: Auf einem Gerät exportieren, die Datei auf das andere Gerät übertragen (z. B. per AirDrop/E-Mail) und dort importieren.
+
+**Am iPhone verwenden:**
+1. Die App muss erreichbar sein (lokal im selben WLAN über die IP des Rechners, oder deployed, z. B. via Vercel).
+2. Im iPhone-Browser (Safari/Chrome) die Adresse mit `/berghaus` öffnen.
+3. Optional: über „Teilen → Zum Home-Bildschirm“ ein App-Icon anlegen, damit sich die Liste wie eine eigene App öffnen lässt.
+
 ## Getting Started
 
 First, run the development server:
