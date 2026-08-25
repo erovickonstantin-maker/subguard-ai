@@ -1,0 +1,19 @@
+{
+  "name": "Berghaus – offene Arbeiten",
+  "short_name": "Berghaus",
+  "description": "To-do-Liste für die Arbeiten am Serbien Berghaus.",
+  "start_url": "/berghaus",
+  "scope": "/berghaus",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f4f5",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/berghaus/icon",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
