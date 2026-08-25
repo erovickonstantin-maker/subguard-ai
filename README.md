@@ -18,8 +18,8 @@ Eine eigenständige, mobilfreundliche To-do-Liste für die Arbeiten am „Serbie
 
 **Am iPhone verwenden:**
 1. Die App muss erreichbar sein (lokal im selben WLAN über die IP des Rechners, oder deployed, z. B. via Vercel).
-2. Im iPhone-Browser (Safari/Chrome) die Adresse mit `/berghaus` öffnen.
-3. Optional: über „Teilen → Zum Home-Bildschirm“ ein App-Icon anlegen, damit sich die Liste wie eine eigene App öffnen lässt.
+2. Im iPhone-Browser (Safari) die Adresse mit `/berghaus` öffnen. Safari zeigt beim ersten Besuch automatisch einen Hinweis-Banner mit der Anleitung zum Hinzufügen.
+3. Über „Teilen → Zum Home-Bildschirm“ ein App-Icon anlegen. Die Seite hat ein eigenes Manifest (`berghaus.webmanifest`) und eigene Icons, sodass sie danach ohne Browser-Adressleiste, mit eigenem Icon und Namen „Berghaus“ wie eine native App startet.
 
 ## Getting Started
 

@@ -8,6 +8,8 @@ import {
   Upload,
   Mountain,
   Check,
+  Share,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -95,10 +97,21 @@ function loadStoredTasks(): Task[] | null {
   }
 }
 
+const IOS_HINT_DISMISSED_KEY = "berghaus-ios-hint-dismissed";
+
+function isIosSafariBrowserTab(): boolean {
+  const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  const isStandalone =
+    "standalone" in window.navigator &&
+    (window.navigator as Navigator & { standalone?: boolean }).standalone;
+  return isIos && !isStandalone;
+}
+
 export default function BerghausPage() {
   const [tasks, setTasks] = useState<Task[] | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState<Category>("Sonstiges");
+  const [showIosHint, setShowIosHint] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load from localStorage once mounted in the browser (window is not
@@ -106,7 +119,20 @@ export default function BerghausPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only hydration from localStorage
     setTasks(loadStoredTasks() ?? defaultTasks());
+    setShowIosHint(
+      isIosSafariBrowserTab() &&
+        !window.localStorage.getItem(IOS_HINT_DISMISSED_KEY)
+    );
   }, []);
+
+  function dismissIosHint() {
+    setShowIosHint(false);
+    try {
+      window.localStorage.setItem(IOS_HINT_DISMISSED_KEY, "1");
+    } catch {
+      // ignore
+    }
+  }
 
   // Persist on every change
   useEffect(() => {
@@ -201,8 +227,26 @@ export default function BerghausPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-muted/30">
-      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+    <div className="min-h-dvh bg-muted/30 [padding-left:env(safe-area-inset-left)] [padding-right:env(safe-area-inset-right)]">
+      {showIosHint && (
+        <div className="flex items-start gap-3 bg-primary px-4 py-3 text-sm text-primary-foreground [padding-top:calc(env(safe-area-inset-top)+0.75rem)]">
+          <Share className="mt-0.5 h-4 w-4 shrink-0" />
+          <p className="flex-1">
+            Tipp: Tippe unten auf <strong>Teilen</strong> und dann auf{" "}
+            <strong>„Zum Home-Bildschirm“</strong>, um Berghaus wie eine App
+            zu öffnen.
+          </p>
+          <button
+            type="button"
+            aria-label="Hinweis schließen"
+            onClick={dismissIosHint}
+            className="shrink-0 rounded-md p-1 hover:bg-primary-foreground/10"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur [padding-top:env(safe-area-inset-top)]">
         <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
             <Mountain className="h-6 w-6 shrink-0 text-primary" />
@@ -228,7 +272,7 @@ export default function BerghausPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+      <main className="mx-auto max-w-3xl px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-6">
         {/* Add task */}
         <Card className="mb-6">
           <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
