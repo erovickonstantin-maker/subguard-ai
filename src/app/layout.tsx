@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +13,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SubGuard AI — Compliance-Überwachung für Subunternehmer",
+  title: "Berghaus – offene Arbeiten",
   description:
-    "SubGuard AI überwacht automatisch Zertifikate und Compliance-Dokumente Ihrer Subunternehmer per KI-Dokumentenanalyse.",
+    "To-do-Liste für die Arbeiten am Serbien Berghaus – Außenbereich, Haus und Technik & Infrastruktur.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Berghaus",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -26,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Providers>{children}</Providers>
+        {children}
       </body>
     </html>
   );

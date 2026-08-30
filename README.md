@@ -1,57 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Berghaus – offene Arbeiten
+==========================
 
-## Berghaus – offene Arbeiten (To-do-App)
+Eine schlanke, mobilfreundliche To-do-Liste für die Arbeiten am „Serbien Berghaus", gebaut mit [Next.js](https://nextjs.org).
 
-Eine eigenständige, mobilfreundliche To-do-Liste für die Arbeiten am „Serbien Berghaus“, erreichbar unter `/berghaus` (z. B. `http://localhost:3000/berghaus`).
-
-**Funktionen:**
-- Aufgaben gruppiert nach Kategorie (Außenbereich, Haus, Technik & Infrastruktur, Sonstiges)
-- Checkbox „erledigt“, Statusauswahl (Offen / In Planung / In Arbeit / Erledigt), optionales Notizfeld, Löschen
-- Neue Aufgaben mit Titel und Kategorie hinzufügen
-- Fortschrittsanzeige mit Fortschrittsbalken ("x von y erledigt")
-- Große, gut anklickbare Bedienelemente – getestet auf Desktop- und iPhone-Breite (390px)
-
-**Datenspeicherung:**
-- Alle Änderungen werden sofort im `localStorage` des Browsers gespeichert (Schlüssel `berghaus-todos`). Nach Schließen und erneutem Öffnen der Seite im selben Browser bleiben alle Aufgaben erhalten.
-- Dieses Projekt enthält zwar eine Supabase-Anbindung, aber ohne ausgefüllte `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env` ist kein Backend aktiv konfiguriert. Die Berghaus-App nutzt deshalb ausschließlich `localStorage` und **synchronisiert die Daten nicht automatisch zwischen mehreren Geräten** (z. B. Computer und iPhone) – jedes Gerät hat seinen eigenen Browser-Speicher.
-- Für den Datenaustausch zwischen Geräten gibt es unten auf der Seite die Buttons „Als JSON exportieren“ und „JSON importieren“: Auf einem Gerät exportieren, die Datei auf das andere Gerät übertragen (z. B. per AirDrop/E-Mail) und dort importieren.
-
-**Am iPhone verwenden:**
-1. Die App muss erreichbar sein (lokal im selben WLAN über die IP des Rechners, oder deployed, z. B. via Vercel).
-2. Im iPhone-Browser (Safari) die Adresse mit `/berghaus` öffnen. Safari zeigt beim ersten Besuch automatisch einen Hinweis-Banner mit der Anleitung zum Hinzufügen.
-3. Über „Teilen → Zum Home-Bildschirm“ ein App-Icon anlegen. Die Seite hat ein eigenes Manifest (`berghaus.webmanifest`) und eigene Icons, sodass sie danach ohne Browser-Adressleiste, mit eigenem Icon und Namen „Berghaus“ wie eine native App startet.
-
-## Getting Started
-
-First, run the development server:
+## Starten
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Dann `http://localhost:3000` im Browser öffnen.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Funktionen
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Aufgaben gruppiert nach Kategorie (Außenbereich, Haus, Technik & Infrastruktur, Sonstiges) mit farbigen Akzenten und Icons, Kategorien lassen sich ein-/ausklappen
+- Checkbox „erledigt", Statusauswahl (Offen / In Planung / In Arbeit / Erledigt), Priorität (Niedrig/Mittel/Hoch), optionales Notiz- und Zuständig-Feld, Löschen
+- Aufgabentitel direkt anklickbar bearbeiten
+- Neue Aufgaben mit Titel und Kategorie hinzufügen
+- Suche (Titel, Notiz, Zuständig), Statusfilter mit Live-Zählern, Sortierung (Neueste/Priorität/A–Z)
+- „Erledigte löschen"-Aktion
+- Fortschrittsanzeige mit Fortschrittsbalken und Feier-Banner bei 100 %
+- Vollständig responsiv, große Bedienelemente, getestet auf Desktop- und iPhone-Breite (390px)
+- Als „App" auf dem iPhone-Homescreen installierbar (eigenes Icon, startet ohne Safari-Adressleiste)
 
-## Learn More
+## Datenspeicherung
 
-To learn more about Next.js, take a look at the following resources:
+- Alle Änderungen werden sofort im `localStorage` des Browsers gespeichert (Schlüssel `berghaus-todos`). Nach Schließen und erneutem Öffnen der Seite im selben Browser bleiben alle Aufgaben erhalten.
+- Es ist kein Backend konfiguriert, daher **synchronisiert die App die Daten nicht automatisch zwischen mehreren Geräten** (z. B. Computer und iPhone) – jedes Gerät hat seinen eigenen Browser-Speicher.
+- Für den Datenaustausch zwischen Geräten gibt es unten auf der Seite die Buttons „Als JSON exportieren" und „JSON importieren": Auf einem Gerät exportieren, die Datei auf das andere Gerät übertragen (z. B. per AirDrop/E-Mail) und dort importieren.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Am iPhone verwenden
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Die App muss erreichbar sein (lokal im selben WLAN über die IP des Rechners, oder deployed, z. B. via Vercel).
+2. Im iPhone-Browser (Safari) die Adresse öffnen. Safari zeigt beim ersten Besuch automatisch einen Hinweis-Banner mit der Anleitung zum Hinzufügen.
+3. Über „Teilen → Zum Home-Bildschirm" ein App-Icon anlegen. Die Seite hat ein eigenes Manifest (`manifest.webmanifest`) und eigene Icons, sodass sie danach ohne Browser-Adressleiste, mit eigenem Icon und Namen „Berghaus" wie eine native App startet.
